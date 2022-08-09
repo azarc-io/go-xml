@@ -164,14 +164,23 @@ func (scope *Scope) Prefix(name xml.Name) (qname string) {
 func (scope *Scope) pushNS(tag xml.StartElement) []xml.Attr {
 	var ns []xml.Name
 	var newAttrs []xml.Attr
+	var targetNamespace string
+	hasXmlns := false
 	for _, attr := range tag.Attr {
 		if attr.Name.Space == "xmlns" {
 			ns = append(ns, xml.Name{attr.Value, attr.Name.Local})
 		} else if attr.Name.Local == "xmlns" {
 			ns = append(ns, xml.Name{attr.Value, ""})
+			hasXmlns = true
 		} else {
+			if attr.Name.Local == "targetNamespace" {
+				targetNamespace = attr.Value
+			}
 			newAttrs = append(newAttrs, attr)
 		}
+	}
+	if !hasXmlns && len(targetNamespace) > 0 {
+		ns = append(ns, xml.Name{Space: targetNamespace})
 	}
 	// Within a single tag, all ns declarations are sorted. This reduces
 	// differences between xmlns declarations between tags when
@@ -336,11 +345,16 @@ func (root *Element) SearchFunc(fn func(*Element) bool) []*Element {
 // Search searches the Element tree for Elements with an xml tag
 // matching the name and xml namespace. If space is the empty string,
 // any namespace is matched.
-func (root *Element) Search(space, local string) []*Element {
+func (root *Element) Search(space string, local ...string) []*Element {
 	return root.SearchFunc(func(el *Element) bool {
-		if local != el.Name.Local {
+		if space != "" && space != el.Name.Space {
 			return false
 		}
-		return space == "" || space == el.Name.Space
+		for _, loc := range local {
+			if loc == el.Name.Local {
+				return true
+			}
+		}
+		return false
 	})
 }

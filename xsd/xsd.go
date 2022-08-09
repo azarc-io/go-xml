@@ -52,6 +52,8 @@ type Element struct {
 	// True if this element can have any name. See
 	// http://www.w3.org/TR/2004/REC-xmlschema-1-20041028/structures.html#element-any
 	Wildcard bool
+	// limit any type by namespace
+	LimitedByNamespace string
 	// Type of this element.
 	Type Type
 	// An abstract type does not appear in the xml document, but
@@ -162,6 +164,8 @@ type ComplexType struct {
 	Elements []Element
 	// Possible attributes for the element's opening tag.
 	Attributes []Attribute
+	// Restrictions on this type's values
+	Restriction Restriction
 	// An abstract type does not appear in the xml document, but
 	// is "implemented" by other types in its substitution group.
 	Abstract bool

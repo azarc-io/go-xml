@@ -681,6 +681,7 @@ func (t *ComplexType) parseSimpleContent(ns string, root *xmltree.Element) {
 			doc = doc.append(parseAnnotation(el))
 		case "restriction":
 			t.Base = parseType(el.Resolve(el.Attr("", "base")))
+			t.Restriction = parseSimpleRestriction(el, t.Base)
 		case "extension":
 			t.Base = parseType(el.Resolve(el.Attr("", "base")))
 			t.Extends = true
@@ -707,19 +708,18 @@ func (t *ComplexType) parseComplexContent(ns string, root *xmltree.Element) {
 		case "restriction":
 			t.Base = parseType(el.Resolve(el.Attr("", "base")))
 
-			for _, v := range el.Search(schemaNS, "any") {
-				t.Elements = append(t.Elements, parseAnyElement(ns, v))
-				break
-			}
-
 			usedElt := make(map[xml.Name]int)
-			for _, v := range el.Search(schemaNS, "element") {
-				elt := parseElement(ns, v)
-				if existing, ok := usedElt[elt.Name]; !ok {
-					usedElt[elt.Name] = len(t.Elements)
-					t.Elements = append(t.Elements, elt)
+			for _, v := range el.Search(schemaNS, "element", "any") {
+				if v.Name.Local == "any" {
+					t.Elements = append(t.Elements, parseAnyElement(ns, v))
 				} else {
-					t.Elements[existing] = joinElem(t.Elements[existing], elt)
+					elt := parseElement(ns, v)
+					if existing, ok := usedElt[elt.Name]; !ok {
+						usedElt[elt.Name] = len(t.Elements)
+						t.Elements = append(t.Elements, elt)
+					} else {
+						t.Elements[existing] = joinElem(t.Elements[existing], elt)
+					}
 				}
 			}
 
@@ -807,10 +807,21 @@ func parseAnyElement(ns string, el *xmltree.Element) Element {
 	if typeattr != "" {
 		base = parseType(el.Resolve(typeattr))
 	}
+	namespaceAttr := el.Attr("", "namespace")
+	defaultAttr := el.Attr("", "default")
+	optional := false
+	if x := el.Attr("", "minOccurs"); x != "" && parseInt(x) == 0 {
+		optional = true
+	} else if defaultAttr != "" {
+		optional = true
+	}
 	return Element{
-		Plural:   parsePlural(el),
-		Type:     base,
-		Wildcard: true,
+		Plural:             parsePlural(el),
+		Type:               base,
+		LimitedByNamespace: namespaceAttr,
+		Optional:           optional,
+		Default:            defaultAttr,
+		Wildcard:           true,
 	}
 }
 
