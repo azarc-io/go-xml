@@ -53,7 +53,7 @@ type Element struct {
 	// http://www.w3.org/TR/2004/REC-xmlschema-1-20041028/structures.html#element-any
 	Wildcard bool
 	// limit any type by namespace
-	LimitedByNamespace string
+	LimitByNamespace string
 	// Type of this element.
 	Type Type
 	// An abstract type does not appear in the xml document, but

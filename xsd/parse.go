@@ -809,19 +809,19 @@ func parseAnyElement(ns string, el *xmltree.Element) Element {
 	}
 	namespaceAttr := el.Attr("", "namespace")
 	defaultAttr := el.Attr("", "default")
-	optional := false
+	var optional bool
 	if x := el.Attr("", "minOccurs"); x != "" && parseInt(x) == 0 {
 		optional = true
 	} else if defaultAttr != "" {
 		optional = true
 	}
 	return Element{
-		Plural:             parsePlural(el),
-		Type:               base,
-		LimitedByNamespace: namespaceAttr,
-		Optional:           optional,
-		Default:            defaultAttr,
-		Wildcard:           true,
+		Plural:           parsePlural(el),
+		Type:             base,
+		LimitByNamespace: namespaceAttr,
+		Optional:         optional,
+		Default:          defaultAttr,
+		Wildcard:         true,
 	}
 }
 

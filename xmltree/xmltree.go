@@ -165,7 +165,7 @@ func (scope *Scope) pushNS(tag xml.StartElement) []xml.Attr {
 	var ns []xml.Name
 	var newAttrs []xml.Attr
 	var targetNamespace string
-	hasXmlns := false
+	var hasXmlns bool
 	for _, attr := range tag.Attr {
 		if attr.Name.Space == "xmlns" {
 			ns = append(ns, xml.Name{attr.Value, attr.Name.Local})
