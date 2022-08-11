@@ -343,7 +343,7 @@ func (root *Element) SearchFunc(fn func(*Element) bool) []*Element {
 }
 
 // Search searches the Element tree for Elements with an xml tag
-// matching the name and xml namespace. If space is the empty string,
+// matching any of the names and xml namespace. If space is the empty string,
 // any namespace is matched.
 func (root *Element) Search(space string, local ...string) []*Element {
 	return root.SearchFunc(func(el *Element) bool {
